@@ -34,5 +34,5 @@ jobs:
       - name: Publish the image to azure container registry
         run: | 
           docker login --username practicum7Reg --password ${{secrets.AZURE_CONTAINER_REGISTRY}} practicum7Reg.azurecr.io
-          docker tag ghcr.io/kylelisscoding/arithmetic-service:latest practicum7Reg.azurecr.io/arithmetic-service:1
+          docker tag ghcr.io/kylelisscoding/arithmetic-service:latest practicum7Reg.azurecr.io/arithmetic-service:latest
           docker push practicum7Reg.azurecr.io/arithmetic-service:latest
