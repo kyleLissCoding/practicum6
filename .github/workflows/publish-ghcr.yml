@@ -47,5 +47,11 @@ jobs:
         with:
             base64-kube-config: ${{secrets.KUBE_CONFIG}}
 
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set execute permissions for deploy.sh
+        run: chmod +x ./deploy.sh
+
       - name: Deploy
         run: ./deploy.sh
