@@ -6,6 +6,11 @@ on:
 jobs:
   build_and_publish:
     runs-on: ubuntu-latest
+    env:
+      VERSION: ${{github.sha}}
+      CONTAINER_REGISTRY: ${{secrets.AZURE_CONTAINER_REGISTRY}}
+      CONTAINER_REGISTRY_UN: ${{secrets.CONTAINER_REGISTRY_UN}}
+      CONTAINER_REGISTRY_PW: ${{secrets.CONTAINER_REGISTRY_PW}}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -29,10 +34,18 @@ jobs:
       - name: Publish the image to github container registry
         run: |
           docker login --username kyleLissCoding --password ${{secrets.ACCESS_TOKEN}} ghcr.io
-          docker build -t ghcr.io/kylelisscoding/arithmetic-service:latest --file Dockerfile .
-          docker push ghcr.io/kylelisscoding/arithmetic-service:latest
+          docker build -t ghcr.io/kylelisscoding/arithmetic-service:$VERSION --file Dockerfile .
+          docker push ghcr.io/kylelisscoding/arithmetic-service:$VERSION
       - name: Publish the image to azure container registry
         run: | 
-          docker login --username practicums --password ${{secrets.AZURE_CONTAINER_REGISTRY}} practicums.azurecr.io
-          docker tag ghcr.io/kylelisscoding/arithmetic-service:latest practicums.azurecr.io/arithmetic-service:latest
-          docker push practicums.azurecr.io/arithmetic-service:latest
+          docker login --username $CONTAINER_REGISTRY_UN --password $CONTAINER_REGISTRY_PW $CONTAINER_REGISTRY
+          docker tag ghcr.io/kylelisscoding/arithmetic-service:$VERSION $CONTAINER_REGISTRY/arithmetic-service:$VERSION
+          docker push $CONTAINER_REGISTRY/arithmetic-service:$VERSION
+
+        # Installs Kubectl and connects it to the cluster
+      - uses: tale/kubectl-action@v1
+        with:
+            base64-kube-config: ${{secrets.KUBE_CONFIG}}
+
+      - name: Deploy
+        run: ./deploy.sh
